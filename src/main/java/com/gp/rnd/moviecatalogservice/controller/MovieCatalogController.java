@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.gp.rnd.moviecatalogservice.entity.CatalogItem;
 import com.gp.rnd.moviecatalogservice.entity.Movie;
 import com.gp.rnd.moviecatalogservice.entity.Rating;
+import com.gp.rnd.moviecatalogservice.entity.UserRating;
 
 @RestController
 @RequestMapping("/catalog")
@@ -30,17 +32,15 @@ public class MovieCatalogController {
 	@GetMapping("/{userId}")
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
-		List<Rating> ratings =  Arrays.asList(
-				new Rating("110",1),
-				new Rating("120",2),
-				new Rating("130",3));
+		UserRating ratings = restTemplate
+				.getForObject("http://ratings-data-service/ratingsdata/users/"+userId, UserRating.class);
 		
-		return ratings
+		return ratings.getRatings()
 				.stream()
 				.map(rating -> {
-						Movie movie = 
+						Movie movie =
 							restTemplate
-							.getForObject("http://localhost:7082/movies/"+rating.getMovieId(), Movie.class);
+							.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
 						return new CatalogItem(movie.getName(),"test",rating.getRating());
 				})
 				.collect(Collectors.toList());
