@@ -22,9 +22,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 @RestController
 @RequestMapping("/catalog")
 public class MovieCatalogController {
-
-	@Autowired
-	private RestTemplate restTemplate;
 	
 	@Autowired
 	private MovieInfo movieInfo;
